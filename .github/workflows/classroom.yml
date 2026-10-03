@@ -17,7 +17,16 @@ jobs:
 
       - uses: docker/setup-buildx-action@v2
 
-      # TODO build and run unit tests
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Run unit tests
+        run: |
+          for service in cars payment rental gateway; do
+            echo "Running tests for $service"
+            (cd "$service" && go vet ./... && go test ./...)
+          done
 
       - name: Build images
         timeout-minutes: 10
@@ -34,9 +43,8 @@ jobs:
       - name: Run API Tests
         uses: matt-ball/newman-action@master
         with:
-          # TODO insert your variant
-          collection: <variant>/postman/collection.json
-          environment: <variant>/postman/environment.json
+          collection: v3/postman/collection.json
+          environment: v3/postman/environment.json
           delayRequest: 100
           reporters: '[ "cli" ]'
 
